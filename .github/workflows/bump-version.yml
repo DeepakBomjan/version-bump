@@ -75,13 +75,13 @@ jobs:
           echo $new_version
   update:
     needs: find_changes
-    strategy:
-      matrix:
-        subproject: ['ibc','lightclients']
+    # strategy:
+    #   matrix:
+    #     subproject: ['ibc','lightclients']
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v4
           with:
             fetch-depth: 0
         - name: echo
-          run: echo ${{ matrix.subproject }}
+          run: echo hello
