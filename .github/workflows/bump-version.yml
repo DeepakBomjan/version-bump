@@ -48,7 +48,8 @@ jobs:
           contains(github.event.pull_request.labels.*.name, 'semver:minor') ||
           contains(github.event.pull_request.labels.*.name, 'semver:major'))
         run: |
-          semver_label=$(echo "${{ github.event.pull_request.labels }}" | jq -r '.[].name | select(startswith("semver:")) | sub("semver:"; "")')
+          echo ${{ github.event.pull_request.labels.*.name }}
+          semver_labels=$(echo "${{ github.event.pull_request.labels }}" | jq -r '.[].name | select(test("semver:.")) | sub("semver:"; "")')
           current_version=$(awk -F"'" '/^version/ {print $2}' contracts/javascore/ibc/build.gradle)
           new_version=$(bash ./calculate_next_semver.sh "$semver_label" )
           echo $new_version
