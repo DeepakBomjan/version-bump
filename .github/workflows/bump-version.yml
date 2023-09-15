@@ -55,11 +55,11 @@ jobs:
           contains(github.event.pull_request.labels.*.name, 'semver:major'))
         
         run: |
-          if $GITHUB_PR_LABEL_SEMVER_MAJOR; then
+          if [ -n "$GITHUB_PR_LABEL_SEMVER_MAJOR" ]; then
             echo "bump major"
-          elif $GITHUB_PR_LABEL_SEMVER_MINOR; then
+          elif [ -n "$GITHUB_PR_LABEL_SEMVER_MINOR" ]; then
             echo "bump minor"
-          elif $$GITHUB_PR_LABEL_SEMVER_PATCH; then
+          elif [ -n "$GITHUB_PR_LABEL_SEMVER_PATCH" ]; then
             echo "bump patch"
           else
             echo "no bump"
