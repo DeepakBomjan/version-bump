@@ -42,12 +42,10 @@ jobs:
           exit_type: success
 
       - name: Install semver
-        run: |
-          # Download and install semver-cli
-          curl -sLO https://github.com/fsaintjacques/semver-tool/releases/download/2.0.0/semver_linux_amd64
-          chmod +x semver_linux_amd64
-          sudo mv semver_linux_amd64 /usr/local/bin/semver
-          /usr/local/bin/semver -h
+        uses: actions/setup-node@v3
+        with:
+        node-version: 18
+      - run: npm install semver
       
       - name: check if bump required
         if: |
