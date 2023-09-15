@@ -30,7 +30,7 @@ jobs:
               - 'javascore/ibc/**'
             lightclients:
               - 'javascore/lightclients/**'
-      - run: for f in ${{ steps.filter.outputs.subprojects }}; do echo $f;done
+      - run: for f in ${{ steps.filter.outputs.changes }}; do echo $f;done
 
       - name: Get javascore files that have changed
         id: changed-files
