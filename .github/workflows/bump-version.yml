@@ -16,26 +16,6 @@ jobs:
 
     name: Test changed-files
     steps:
-      - name: Find projects
-        id: find-projects
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const projects = [];
-            const files = await github.actions.getInputs({
-              token: github.token,
-              path: '/',
-              recursive: true
-            });
-            for (const file of files) {
-              if (file.path.endsWith('Cargo.toml')) {
-                projects.push(file.path.substring(0, file.path.length - 'Cargo.toml'.length));
-              }
-            }
-            return projects;
-      - name: List subprojects
-        run: echo ${{ matrix.javascore_subproject }}
-
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
