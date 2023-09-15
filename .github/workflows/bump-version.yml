@@ -57,16 +57,18 @@ jobs:
         run: |
           if [ -n "$GITHUB_PR_LABEL_SEMVER_MAJOR" ]; then
             echo "bump major"
+            bump_type=major
           elif [ -n "$GITHUB_PR_LABEL_SEMVER_MINOR" ]; then
             echo "bump minor"
+            bump_type=minor
           elif [ -n "$GITHUB_PR_LABEL_SEMVER_PATCH" ]; then
             echo "bump patch"
+            bump_type=patch
           else
             echo "no bump"
           fi
-          #   echo ${{ github.event.pull_request.labels.*.name }}
-          # semver_labels=$(echo "${{ github.event.pull_request.labels }}" | jq -r '.[].name | select(test("semver:.")) | sub("semver:"; "")')
-          # current_version=$(awk -F"'" '/^version/ {print $2}' contracts/javascore/ibc/build.gradle)
-          # new_version=$(bash ./calculate_next_semver.sh "$semver_label" )
-          # echo $new_version
+          semver_labels=$(echo "${{ github.event.pull_request.labels }}" | jq -r '.[].name | select(test("semver:.")) | sub("semver:"; "")')
+          current_version=$(awk -F"'" '/^version/ {print $2}' contracts/javascore/ibc/build.gradle)
+          new_version=$(bash ./calculate_next_semver.sh "$current_version" "$bump_type" )
+          echo $new_version
           
