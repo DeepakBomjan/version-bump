@@ -30,7 +30,9 @@ jobs:
               - 'javascore/ibc/**'
             lightclients:
               - 'javascore/lightclients/**'
-
+      - run: |
+          for f in {{ steps.filter.outputs.subprojects }}; do echo $f;done
+          
       - name: Get javascore files that have changed
         id: changed-files
         uses: tj-actions/changed-files@v39
@@ -72,14 +74,14 @@ jobs:
           current_version=$(awk -F"'" '/^version/ {print $2}' contracts/javascore/ibc/build.gradle)
           new_version=$(bash ./calculate_next_semver.sh "$current_version" "$bump_type" )
           echo $new_version
-  update:
-    needs: find_changes
-    strategy:
-      matrix:
-        subprojects: ${{ fromJSON(needs.find_changes.outputs.subprojects) }}
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-          with:
-            fetch-depth: 0
-        - run: echo ${{ matrix.subprojects }}
+  # update:
+  #   needs: find_changes
+  #   strategy:
+  #     matrix:
+  #       subprojects: ${{ fromJSON(needs.find_changes.outputs.subprojects) }}
+  #     runs-on: ubuntu-latest
+  #     steps:
+  #       - uses: actions/checkout@v4
+  #         with:
+  #           fetch-depth: 0
+  #       - run: echo ${{ matrix.subprojects }}
