@@ -78,10 +78,10 @@ jobs:
     # strategy:
     #   matrix:
     #     subproject: ['ibc','lightclients']
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-          with:
-            fetch-depth: 0
-        - name: echo
-          run: echo hello
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: echo
+        run: echo hello
