@@ -41,13 +41,21 @@ jobs:
           labels: "semver:patch, semver:minor, semver:major"
           exit_type: success
 
+      - name: Get PR labels
+        id: pr-labels
+        uses: joerick/pr-labels-action@v1.0.8
+
+      - run: |
+          echo $GITHUB_PR_LABEL_SEMVER:PATCH
+
       - name: check if bump required
-        if: |
-          steps.javascore.outputs.ibc_any_changed == 'true' && 
+        if: steps.javascore.outputs.ibc_any_changed == 'true'
           (contains(github.event.pull_request.labels.*.name, 'semver:patch') ||
           contains(github.event.pull_request.labels.*.name, 'semver:minor') ||
           contains(github.event.pull_request.labels.*.name, 'semver:major'))
+        
         run: |
+          if: contains(steps.pr-labels.outputs.labels, ' test-flimbomble ')
           echo ${{ github.event.pull_request.labels.*.name }}
           semver_labels=$(echo "${{ github.event.pull_request.labels }}" | jq -r '.[].name | select(test("semver:.")) | sub("semver:"; "")')
           current_version=$(awk -F"'" '/^version/ {print $2}' contracts/javascore/ibc/build.gradle)
