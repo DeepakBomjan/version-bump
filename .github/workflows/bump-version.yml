@@ -46,7 +46,7 @@ jobs:
         uses: joerick/pr-labels-action@v1.0.8
 
       - run: |
-          echo $(steps.pr-labels.outputs.labels)
+          echo $GITHUB_PR_LABEL_SEMVER_MAJOR
 
       - name: check if bump required
         if: steps.javascore.outputs.ibc_any_changed == 'true' &&
