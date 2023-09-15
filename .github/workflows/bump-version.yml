@@ -40,6 +40,13 @@ jobs:
           count: 1
           labels: "semver:patch, semver:minor, semver:major"
           exit_type: success
+          
+      - name: Install semver
+        run: |
+          # Download and install semver-cli
+          curl -sLO https://github.com/fsaintjacques/semver-tool/releases/download/2.0.0/semver_linux_amd64
+          chmod +x semver_linux_amd64
+          sudo mv semver_linux_amd64 /usr/local/bin/semver
       
       - name: check if bump required
         if: |
@@ -48,6 +55,7 @@ jobs:
           contains(github.event.pull_request.labels.*.name, 'semver:minor') ||
           contains(github.event.pull_request.labels.*.name, 'semver:major'))
         run: |
+          sudo apt-get update
           sudo apt-get install -y semver-cli
           current_version=$(awk -F"'" '/^version/ {print $2}' contracts/javascore/ibc/build.gradle)
           new_version=$(semver bump minor "$current_version")
