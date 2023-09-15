@@ -43,7 +43,11 @@ jobs:
           exit_type: success
       
       - name: check if bump required
-        if: steps.javascore.outputs.ibc_any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'semver:patch1')
+        if: |
+          steps.javascore.outputs.ibc_any_changed == 'true' && 
+          contains(github.event.pull_request.labels.*.name, 'semver:patch') ||
+          contains(github.event.pull_request.labels.*.name, 'semver:minor') ||
+          contains(github.event.pull_request.labels.*.name, 'semver:major')
         run: |
           echo "$steps.javascore.outputs.ibc_any_changed"
           echo "One or more test file(s) has changed."
