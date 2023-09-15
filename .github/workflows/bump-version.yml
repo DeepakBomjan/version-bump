@@ -21,17 +21,17 @@ jobs:
           fetch-depth: 0
 
       - name: Get javascore files that have changed
-        working-directory: contracts/javascore
+        # working-directory: contracts/javascore
         id: javascore
         uses: tj-actions/changed-files@v39
         with:
           files_yaml: |
             ibc:
-              - 'ibc/**'
+              - 'contracts/javascore/ibc/**'
             lightclients:
-              - 'lightclients/**'
+              - 'contracts/javascore/lightclients/**'
             xcall-connection:
-              - 'xcall-connection/**'
+              - 'contracts/javascore/xcall-connection/**'
 
       - name: Check Label
         id: check-labels
