@@ -43,7 +43,7 @@ jobs:
           exit_type: success
       
       - name: check if bump required
-        if: steps.javascore.outputs.ibc_any_changed == 'true'
+        if: steps.javascore.outputs.ibc_any_changed == 'true' && steps.check-labels.outputs.labels == 'true'
         run: |
           echo "$steps.javascore.outputs.ibc_any_changed"
           echo "One or more test file(s) has changed."
