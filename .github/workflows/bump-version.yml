@@ -84,4 +84,4 @@ jobs:
         with:
           fetch-depth: 0
       - name: echo
-        run: echo hello
+        run: echo ${{ matrix.subproject }}
