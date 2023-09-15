@@ -1,0 +1,6 @@
+ibc:
+  - 'contracts/javascore/ibc/**'
+lightclients:
+  - 'contracts/javascore/lightclients/**'
+xcall-connection:
+  - 'contracts/javascore/xcall-conn
