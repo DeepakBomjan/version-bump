@@ -13,10 +13,6 @@ jobs:
       pull-requests: write
     outputs:
       status: ${{ steps.check-labels.outputs.status }}
-    strategy:
-      matrix:
-        project: ${{ steps.find-projects.outputs.projects }}
-
 
     name: Test changed-files
     steps:
