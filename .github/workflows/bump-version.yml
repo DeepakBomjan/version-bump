@@ -52,7 +52,4 @@ jobs:
           current_version=$(awk -F"'" '/^version/ {print $2}' contracts/javascore/ibc/build.gradle)
           new_version=$(semver bump minor "$current_version")
           echo $new_version
-          # git config user.name "Deepak Bomjan"
-          # git config user.email "dpaktamang@github.com"
-          # git commit -am "Update version in "
-          # git push origin HEAD:main
+          
