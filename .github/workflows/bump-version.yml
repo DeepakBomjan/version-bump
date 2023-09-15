@@ -47,6 +47,7 @@ jobs:
           curl -sLO https://github.com/fsaintjacques/semver-tool/releases/download/2.0.0/semver_linux_amd64
           chmod +x semver_linux_amd64
           sudo mv semver_linux_amd64 /usr/local/bin/semver
+          /usr/local/bin/semver -h
       
       - name: check if bump required
         if: |
