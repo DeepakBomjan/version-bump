@@ -55,7 +55,6 @@ jobs:
           contains(github.event.pull_request.labels.*.name, 'semver:major'))
         
         run: |
-          if: contains(steps.pr-labels.outputs.labels, ' test-flimbomble ')
           echo ${{ github.event.pull_request.labels.*.name }}
           semver_labels=$(echo "${{ github.event.pull_request.labels }}" | jq -r '.[].name | select(test("semver:.")) | sub("semver:"; "")')
           current_version=$(awk -F"'" '/^version/ {print $2}' contracts/javascore/ibc/build.gradle)
