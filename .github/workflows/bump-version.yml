@@ -33,19 +33,6 @@ jobs:
             xcall-connection:
               - 'xcall-connection/**'
 
-      - name: Run step if test file(s) change
-        if: steps.javascore.outputs.ibc_any_changed == 'true'  
-        run: |
-          echo "$steps.javascore.outputs.ibc_any_changed"
-          echo "One or more test file(s) has changed."
-          echo "List all the files that have changed: ${{ steps.javascore.outputs.ibc_all_changed_files }}"
-      
-      - name: Run step if doc file(s) change
-        if: steps.javascore.outputs.lightclients_any_changed == 'true'
-        run: |
-          echo "One or more doc file(s) has changed."
-          echo "List all the files that have changed: ${{ steps.javascore.outputs.lightclients_all_changed_files }}"
-
       - name: Check Label
         id: check-labels
         uses: mheap/github-action-required-labels@v5
@@ -54,4 +41,12 @@ jobs:
           count: 1
           labels: "semver:patch, semver:minor, semver:major"
           exit_type: success
+      
+      - name: check if bump required
+        if: steps.javascore.outputs.ibc_any_changed == 'true' && steps.check-labels.outputs.labels == 'true'
+        run: |
+          echo "$steps.javascore.outputs.ibc_any_changed"
+          echo "One or more test file(s) has changed."
+          echo "List all the files that have changed: ${{ steps.javascore.outputs.ibc_all_changed_files }}"
+      
       
