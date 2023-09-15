@@ -3,4 +3,4 @@ ibc:
 lightclients:
   - 'contracts/javascore/lightclients/**'
 xcall-connection:
-  - 'contracts/javascore/xcall-conn
+  - 'contracts/javascore/xcall-conn'
