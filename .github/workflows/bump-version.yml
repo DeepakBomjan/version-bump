@@ -6,13 +6,14 @@ on:
       - main
 
 jobs:
-  changed_files:
+  find_changes:
     runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: write
     outputs:
       status: ${{ steps.check-labels.outputs.status }}
+      subprojects: ${{ steps.filter.outputs.changes }}
 
     name: Test changed-files
     steps:
@@ -20,18 +21,21 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          working-directory: contracts
+          filters: |
+            ibc:
+              - 'javascore/ibc/**'
+            lightclients:
+              - 'javascore/lightclients/**'
+
       - name: Get javascore files that have changed
-        id: javascore
+        id: changed-files
         uses: tj-actions/changed-files@v39
         with:
           files_yaml_from_source_file: .github/changed-files.yaml
-          # files_yaml: |
-            # ibc:
-            #   - 'contracts/javascore/ibc/**'
-            # lightclients:
-            #   - 'contracts/javascore/lightclients/**'
-            # xcall-connection:
-            #   - 'contracts/javascore/xcall-connection/**'
 
       - name: Check Label
         id: check-labels
@@ -46,11 +50,8 @@ jobs:
         id: pr-labels
         uses: joerick/pr-labels-action@v1.0.8
 
-      - run: |
-          echo $GITHUB_PR_LABEL_SEMVER_MAJOR
-
       - name: check if bump required
-        if: steps.javascore.outputs.ibc_any_changed == 'true' &&
+        if: steps.changed-files.outputs.ibc_any_changed == 'true' &&
           (contains(github.event.pull_request.labels.*.name, 'semver:patch') ||
           contains(github.event.pull_request.labels.*.name, 'semver:minor') ||
           contains(github.event.pull_request.labels.*.name, 'semver:major'))
@@ -71,4 +72,15 @@ jobs:
           current_version=$(awk -F"'" '/^version/ {print $2}' contracts/javascore/ibc/build.gradle)
           new_version=$(bash ./calculate_next_semver.sh "$current_version" "$bump_type" )
           echo $new_version
-          
+  update:
+    needs: find_changes
+    strategy:
+      matrix:
+        subprojects: ${{ fromJSON(needs.find_changes.outputs.subprojects) }}
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+        - run: echo ${{ matrix.subprojects }}
+                  }
