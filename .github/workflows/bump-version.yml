@@ -24,12 +24,7 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: filter
         with:
-          # working-directory: contracts
           filters: .github/changed-files.yaml
-            # ibc:
-            #   - 'javascore/ibc/**'
-            # lightclients:
-            #   - 'javascore/lightclients/**'
       - run: for f in ${{ steps.filter.outputs.changes }}; do echo $f;done
 
       - name: Get javascore files that have changed
@@ -51,12 +46,41 @@ jobs:
         id: pr-labels
         uses: joerick/pr-labels-action@v1.0.8
 
-      - name: check if bump required
-        if: steps.changed-files.outputs.ibc_any_changed == 'true' &&
-          (contains(github.event.pull_request.labels.*.name, 'semver:patch') ||
-          contains(github.event.pull_request.labels.*.name, 'semver:minor') ||
-          contains(github.event.pull_request.labels.*.name, 'semver:major'))
+      # - name: check if bump required
+      #   if: steps.changed-files.outputs.ibc_any_changed == 'true' &&
+      #     (contains(github.event.pull_request.labels.*.name, 'semver:patch') ||
+      #     contains(github.event.pull_request.labels.*.name, 'semver:minor') ||
+      #     contains(github.event.pull_request.labels.*.name, 'semver:major'))
         
+        # run: |
+        #   if [ -n "$GITHUB_PR_LABEL_SEMVER_MAJOR" ]; then
+        #     echo "bump major"
+        #     bump_type=major
+        #   elif [ -n "$GITHUB_PR_LABEL_SEMVER_MINOR" ]; then
+        #     echo "bump minor"
+        #     bump_type=minor
+        #   elif [ -n "$GITHUB_PR_LABEL_SEMVER_PATCH" ]; then
+        #     echo "bump patch"
+        #     bump_type=patch
+        #   else
+        #     echo "no bump"
+        #   fi
+        #   current_version=$(awk -F"'" '/^version/ {print $2}' contracts/javascore/ibc/build.gradle)
+        #   new_version=$(bash ./calculate_next_semver.sh "$current_version" "$bump_type" )
+        #   echo $new_version
+  update:
+    needs: find_changes
+    strategy:
+      matrix:
+        subproject: ${{fromJson(needs.find_changes.outputs.subprojects)}}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: echo
+        run: echo ${{ matrix.subproject }}
+      - name: Fine new version
         run: |
           if [ -n "$GITHUB_PR_LABEL_SEMVER_MAJOR" ]; then
             echo "bump major"
@@ -73,15 +97,3 @@ jobs:
           current_version=$(awk -F"'" '/^version/ {print $2}' contracts/javascore/ibc/build.gradle)
           new_version=$(bash ./calculate_next_semver.sh "$current_version" "$bump_type" )
           echo $new_version
-  update:
-    needs: find_changes
-    strategy:
-      matrix:
-        subproject: ${{fromJson(needs.find_changes.outputs.subprojects)}}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: echo
-        run: echo ${{ matrix.subproject }}
