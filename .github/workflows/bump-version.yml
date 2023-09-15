@@ -41,17 +41,17 @@ jobs:
           fetch-depth: 0
 
       - name: Get javascore files that have changed
-        working-directory: contracts/javascore
+        # working-directory: contracts/javascore
         id: javascore
         uses: tj-actions/changed-files@v39
-          with:
-            files_yaml: |
-              ibc:
-                - 'ibc/**'
-              lightclients:
-                - 'lightclients/**'
-              xcall-connection:
-                - 'xcall-connection/**'
+        with:
+          files_yaml: |
+            ibc:
+              - 'ibc/**'
+            lightclients:
+              - 'lightclients/**'
+            xcall-connection:
+              - 'xcall-connection/**'
 
       - name: Run step if test file(s) change
         if: steps.javascore.outputs.ibc_any_changed == 'true'  
