@@ -41,12 +41,6 @@ jobs:
           labels: "semver:patch, semver:minor, semver:major"
           exit_type: success
 
-      - name: Install semver
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - run: npm install semver
-      
       - name: check if bump required
         if: |
           steps.javascore.outputs.ibc_any_changed == 'true' && 
@@ -54,7 +48,8 @@ jobs:
           contains(github.event.pull_request.labels.*.name, 'semver:minor') ||
           contains(github.event.pull_request.labels.*.name, 'semver:major'))
         run: |
+          semver_label=$(echo "${{ github.event.pull_request.labels }}" | jq -r '.[].name | select(startswith("semver:")) | sub("semver:"; "")')
           current_version=$(awk -F"'" '/^version/ {print $2}' contracts/javascore/ibc/build.gradle)
-          new_version=$(semver bump minor "$current_version")
+          new_version=$(bash ./calculate_next_semver.sh "$semver_label" )
           echo $new_version
           
