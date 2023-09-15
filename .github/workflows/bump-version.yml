@@ -13,32 +13,32 @@ jobs:
       pull-requests: write
     outputs:
       status: ${{ steps.check-labels.outputs.status }}
-    # strategy:
-    #   matrix:
-    #     project: ${{ steps.find-projects.outputs.projects }}
+    strategy:
+      matrix:
+        project: ${{ steps.find-projects.outputs.projects }}
 
 
-    # name: Test changed-files
+    name: Test changed-files
     steps:
-      # - name: Find projects
-      #   id: find-projects
-      #   uses: actions/github-script@v6
-      #   with:
-      #     script: |
-      #       const projects = [];
-      #       const files = await github.actions.getInputs({
-      #         token: github.token,
-      #         path: '/',
-      #         recursive: true
-      #       });
-      #       for (const file of files) {
-      #         if (file.path.endsWith('Cargo.toml')) {
-      #           projects.push(file.path.substring(0, file.path.length - 'Cargo.toml'.length));
-      #         }
-      #       }
-      #       return projects;
-      # - name: List subprojects
-      #   run: echo ${{ matrix.javascore_subproject }}
+      - name: Find projects
+        id: find-projects
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const projects = [];
+            const files = await github.actions.getInputs({
+              token: github.token,
+              path: '/',
+              recursive: true
+            });
+            for (const file of files) {
+              if (file.path.endsWith('Cargo.toml')) {
+                projects.push(file.path.substring(0, file.path.length - 'Cargo.toml'.length));
+              }
+            }
+            return projects;
+      - name: List subprojects
+        run: echo ${{ matrix.javascore_subproject }}
 
       - uses: actions/checkout@v4
         with:
@@ -79,48 +79,3 @@ jobs:
           labels: "semver:patch, semver:minor, semver:major"
           exit_type: success
       
-
-
-# name: Update Version in Cargo.toml
-
-# on:
-#   push:
-#     paths:
-#       - '**/Cargo.toml' # Trigger on changes to Cargo.toml files
-
-# jobs:
-#   discover-subprojects:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Check out code
-#         uses: actions/checkout@v2
-
-#       - name: Discover Subprojects
-#         id: set-matrix
-#         run: |
-#           subprojects=()
-#           for dir in $(find . -type f -name 'Cargo.toml' -exec dirname {} \;); do
-#             subprojects+=("$dir")
-#           done
-#           echo "subprojects=${subprojects[*]}" >> $GITHUB_ENV
-
-
-#   update-version:
-#     needs: discover-subprojects
-#     runs-on: ubuntu-latest
-
-#     strategy:
-#       matrix:
-#         subproject: ${{ steps.discover-subprojects.outputs.subprojects }}
-
-#     steps:
-#       - name: Check out code
-#         uses: actions/checkout@v2
-
-#       - name: Update Version in Cargo.toml
-#         run: |
-#           subproject="$INPUT_SUBPROJECT"
-#           echo $subproject
-#         env:
-#           INPUT_SUBPROJECT: ${{ needs.discover-subprojects.outputs.subprojects }}
