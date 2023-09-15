@@ -40,7 +40,7 @@ jobs:
           count: 1
           labels: "semver:patch, semver:minor, semver:major"
           exit_type: success
-          
+
       - name: Install semver
         run: |
           # Download and install semver-cli
@@ -55,8 +55,6 @@ jobs:
           contains(github.event.pull_request.labels.*.name, 'semver:minor') ||
           contains(github.event.pull_request.labels.*.name, 'semver:major'))
         run: |
-          sudo apt-get update
-          sudo apt-get install -y semver-cli
           current_version=$(awk -F"'" '/^version/ {print $2}' contracts/javascore/ibc/build.gradle)
           new_version=$(semver bump minor "$current_version")
           echo $new_version
