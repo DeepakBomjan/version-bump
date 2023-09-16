@@ -63,7 +63,7 @@ jobs:
         uses: joerick/pr-labels-action@v1.0.8
 
       - name: Find new version
-        working-directory: contracts
+        # working-directory: contracts
         run: |
           if [ -n "$GITHUB_PR_LABEL_SEMVER_MAJOR" ]; then
             echo "bump major"
@@ -78,6 +78,6 @@ jobs:
             echo "no bump"
           fi
           project_dir=${SUBPROJECT//_/\/}
-          current_version=$(awk -F"'" '/^version/ {print $2}' ${project_dir}/build.gradle)
+          current_version=$(awk -F"'" '/^version/ {print $2}' contracts/${project_dir}/build.gradle)
           new_version=$(bash ./calculate_next_semver.sh "$current_version" "$bump_type" )
           echo $new_version
