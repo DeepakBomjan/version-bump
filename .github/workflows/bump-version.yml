@@ -81,7 +81,7 @@ jobs:
           current_version=$(awk -F"'" '/^version/ {print $2}' contracts/${project_dir}/build.gradle)
           new_version=$(bash ./calculate_next_semver.sh "$current_version" "$bump_type" )
           echo $new_version
-          ggit config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git commit -a -m "Bump Version v${current_version} -> v${incremented_version}"
       - name: Push changes
