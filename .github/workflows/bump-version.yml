@@ -81,7 +81,8 @@ jobs:
           current_version=$(awk -F"'" '/^version/ {print $2}' contracts/${project_dir}/build.gradle)
           new_version=$(bash ./calculate_next_semver.sh "$current_version" "$bump_type" )
           echo $new_version
-          git config user.email "dpaktamang@gmail.com"
+          git config --global user.email "dpaktamang@gmail.com"
+          git config --global user.name "Deepak Bomjan"
           echo "commiting the version bump changes..."
           git add .
           git commit -m "Bump Version v${current_version} -> v${new_version}" --amend
