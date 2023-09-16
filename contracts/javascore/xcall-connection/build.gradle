@@ -1,4 +1,4 @@
-version = '0.1.0'
+version = '0.1.3'
 
 dependencies {
     implementation group: 'xyz.venture23', name: 'xcall-lib', version: '0.1.1'
