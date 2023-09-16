@@ -5,4 +5,4 @@ javascore_lightclients_tendermint:
 javascore_lightclients_mockclient:
   - 'contracts/javascore/lightclients/mockclient/**'
 javascore_xcall-connection:
-  - 'contracts/javascore/xcall-connection'
+  - 'contracts/javascore/xcall-connection/**'
