@@ -74,7 +74,8 @@ jobs:
           else
             echo "no bump"
           fi
-          project_dir="${{ matrix.subproject//_/\/ }}"
-          current_version=$(awk -F"'" '/^version/ {print $2}' ${project_dir}/ibc/build.gradle)
+          subproject=${{ matrix.subproject }}
+          project_dir=${subproject//_/\/}
+          current_version=$(awk -F"'" '/^version/ {print $2}' ${project_dir}/build.gradle)
           new_version=$(bash ./calculate_next_semver.sh "$current_version" "$bump_type" )
           echo $new_version
