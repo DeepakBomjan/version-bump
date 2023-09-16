@@ -46,6 +46,9 @@ jobs:
       - name: echo
         run: echo ${{ matrix.subproject }}
 
+      - name: Set subproject as environment variable
+        run: echo "SUBPROJECT=${{ matrix.subproject }}" >> $GITHUB_ENV
+
       - name: Check Label
         id: check-labels
         uses: mheap/github-action-required-labels@v5
@@ -74,8 +77,7 @@ jobs:
           else
             echo "no bump"
           fi
-          subproject=${{ matrix.subproject }}
-          project_dir=${subproject//_/\/}
+          project_dir=${SUBPROJECT//_/\/}
           current_version=$(awk -F"'" '/^version/ {print $2}' ${project_dir}/build.gradle)
           new_version=$(bash ./calculate_next_semver.sh "$current_version" "$bump_type" )
           echo $new_version
