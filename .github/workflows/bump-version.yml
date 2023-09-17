@@ -39,6 +39,10 @@ jobs:
       matrix:
         subproject: ${{fromJson(needs.file-changes.outputs.subprojects)}}
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
