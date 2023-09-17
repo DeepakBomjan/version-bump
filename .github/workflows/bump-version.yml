@@ -81,6 +81,7 @@ jobs:
             bump_type=patch
           else
             echo "no bump"
+            exit 0
           fi
           project_dir=${SUBPROJECT//_/\/}
           current_version=$(awk -F"'" '/^version/ {print $2}' contracts/${project_dir}/build.gradle)
