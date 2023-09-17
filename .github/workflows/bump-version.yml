@@ -62,6 +62,8 @@ jobs:
           mode: exactly
           count: 1
           labels: "semver:patch, semver:minor, semver:major"
+          add_comment: true
+          message: "The PR has missing labels: semver:patch, semver:minor, semver:major "
           exit_type: success
 
       - name: Get PR labels
@@ -69,6 +71,7 @@ jobs:
         uses: joerick/pr-labels-action@v1.0.8
 
       - name: Find new version
+        id: get_vers
         # working-directory: contracts
         run: |
           if [ -n "$GITHUB_PR_LABEL_SEMVER_MAJOR" ]; then
@@ -82,7 +85,7 @@ jobs:
             bump_type=patch
           else
             echo "no bump"
-            exit 0
+            echo ::set-output name=exit_code::1
           fi
           project_dir=${SUBPROJECT//_/\/}
           current_version=$(awk -F"'" '/^version/ {print $2}' contracts/${project_dir}/build.gradle)
@@ -92,15 +95,11 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git commit -a -m "Bump Version v${current_version} -> v${incremented_version}"
-      # - name: Push changes
-      #   uses: ad-m/github-push-action@master
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Push changes to source branch of PR
-        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
-        run: |
-          # Get the source branch name of the PR
-          source_branch="${GITHUB_REF#refs/pull/}"
-          source_branch="${source_branch%%/merge}"
-          git push origin HEAD:"refs/heads/$source_branch"
+      - name: Push changes
+        if: steps.get_vers.outputs.exit_code != 1
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      
 
