@@ -2,8 +2,8 @@ name: Changed-files
 
 on:
   pull_request:
-    branches:
-      - main
+    types:
+      - closed
 
 jobs:
   file-changes:
@@ -93,4 +93,3 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
