@@ -1,4 +1,4 @@
-// Right now
+// Right nowfasdfas
 package ibc.ics23.commitment;
 
 import icon.proto.core.commitment.*;
