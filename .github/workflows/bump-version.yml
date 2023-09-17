@@ -11,6 +11,7 @@ jobs:
     permissions:
       issues: write
       pull-requests: write
+      contents: write
     outputs:
       status: ${{ steps.check-labels.outputs.status }}
       subprojects: ${{ steps.filter.outputs.changes }}
@@ -89,7 +90,15 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git commit -a -m "Bump Version v${current_version} -> v${incremented_version}"
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Push changes
+      #   uses: ad-m/github-push-action@master
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push changes to source branch of PR
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        run: |
+          # Get the source branch name of the PR
+          source_branch="${GITHUB_REF#refs/pull/}"
+          source_branch="${source_branch%%/merge}"
+          git push origin HEAD:"refs/heads/$source_branch"
+
