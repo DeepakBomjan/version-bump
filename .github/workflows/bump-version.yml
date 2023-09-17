@@ -71,6 +71,7 @@ jobs:
         uses: joerick/pr-labels-action@v1.0.8
 
       - name: Find new version
+        id: get_vers
         # working-directory: contracts
         run: |
           if [ -n "$GITHUB_PR_LABEL_SEMVER_MAJOR" ]; then
@@ -84,7 +85,7 @@ jobs:
             bump_type=patch
           else
             echo "no bump"
-            exit 0
+            echo ::set-output name=exit_code::1
           fi
           project_dir=${SUBPROJECT//_/\/}
           current_version=$(awk -F"'" '/^version/ {print $2}' contracts/${project_dir}/build.gradle)
@@ -95,8 +96,10 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git commit -a -m "Bump Version v${current_version} -> v${incremented_version}"
       - name: Push changes
+        if: steps.get_vers.outputs.exit_code != 1
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
       
 

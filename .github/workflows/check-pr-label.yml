@@ -25,4 +25,4 @@ jobs:
           count: 1
           labels: "semver:patch, semver:minor, semver:major"
           add_comment: true
-          message: "You have missing pr label: semver:patch, semver:minor, semver:major"
+          message: "You have missing semvers label: semver:patch, semver:minor, semver:major"
