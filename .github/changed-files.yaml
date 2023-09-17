@@ -1,0 +1,8 @@
+javascore_ibc:
+  - 'contracts/javascore/ibc/**'
+javascore_lightclients_tendermint:
+  - 'contracts/javascore/lightclients/tendermint/**'
+javascore_lightclients_mockclient:
+  - 'contracts/javascore/lightclients/mockclient/**'
+javascore_xcall-connection:
+  - 'contracts/javascore/xcall-connection/**'

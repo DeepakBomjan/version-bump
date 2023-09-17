@@ -2,125 +2,94 @@ name: Changed-files
 
 on:
   pull_request:
-    branches:
-      - main
-
-# jobs:
-#   changed_files:
-#     runs-on: ubuntu-latest
-#     permissions:
-#       issues: write
-#       pull-requests: write
-#     outputs:
-#       status: ${{ steps.check-labels.outputs.status }}
-#     strategy:
-#       matrix:
-#         project: ${{ steps.find-projects.outputs.projects }}
-
-
-#     name: Test changed-files
-#     steps:
-#       - name: Find projects
-#         id: find-projects
-#         uses: actions/github-script@v6
-#         with:
-#           script: |
-#             const projects = [];
-#             const files = await github.actions.getInputs({
-#               token: github.token,
-#               path: '/',
-#               recursive: true
-#             });
-#             for (const file of files) {
-#               if (file.path.endsWith('Cargo.toml')) {
-#                 projects.push(file.path.substring(0, file.path.length - 'Cargo.toml'.length));
-#               }
-#             }
-#             return projects;
-#       - name: List subprojects
-#         run: echo ${{ matrix.javascore_subproject }}
-
-#       - uses: actions/checkout@v4
-#         with:
-#           fetch-depth: 0
-
-#       - name: Get javascore files that have changed
-#         working-directory: contracts/javascore
-#         id: javascore
-#         uses: tj-actions/changed-files@v39
-#         with:
-#           files_yaml: |
-#             ibc:
-#               - 'ibc/**'
-#             lightclients:
-#               - 'lightclients/**'
-#             xcall-connection:
-#               - 'xcall-connection/**'
-
-#       - name: Run step if test file(s) change
-#         if: steps.javascore.outputs.ibc_any_changed == 'true'  
-#         run: |
-#           echo "$steps.javascore.outputs.ibc_any_changed"
-#           echo "One or more test file(s) has changed."
-#           echo "List all the files that have changed: ${{ steps.javascore.outputs.ibc_all_changed_files }}"
-      
-#       - name: Run step if doc file(s) change
-#         if: steps.javascore.outputs.lightclients_any_changed == 'true'
-#         run: |
-#           echo "One or more doc file(s) has changed."
-#           echo "List all the files that have changed: ${{ steps.javascore.outputs.lightclients_all_changed_files }}"
-
-#       - name: Check Label
-#         id: check-labels
-#         uses: mheap/github-action-required-labels@v5
-#         with:
-#           mode: exactly
-#           count: 1
-#           labels: "semver:patch, semver:minor, semver:major"
-#           exit_type: success
-#       
-
-
-# name: Update Version in Cargo.toml
-
-# on:
-#   push:
-#     paths:
-#       - '**/Cargo.toml' # Trigger on changes to Cargo.toml files
+    types:
+      - closed
 
 jobs:
-  discover-subprojects:
+  file-changes:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    outputs:
+      status: ${{ steps.check-labels.outputs.status }}
+      subprojects: ${{ steps.filter.outputs.changes }}
 
+    name: Test changed-files
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Discover Subprojects
-        id: set-matrix
-        run: |
-          subprojects=()
-          for dir in $(find . -type f -name 'Cargo.toml' -exec dirname {} \;); do
-            subprojects+=("$dir")
-          done
-          echo "subprojects=${subprojects[*]}" >> $GITHUB_ENV
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: .github/changed-files.yaml
+      - run: for f in ${{ steps.filter.outputs.changes }}; do echo $f;done
 
+      - name: Get javascore files that have changed
+        id: changed-files
+        uses: tj-actions/changed-files@v39
+        with:
+          files_yaml_from_source_file: .github/changed-files.yaml
 
-  update-version:
-    needs: discover-subprojects
-    runs-on: ubuntu-latest
-
+  update:
+    needs: file-changes
     strategy:
       matrix:
-        subproject: ${{ steps.discover-subprojects.outputs.subprojects }}
-
+        subproject: ${{fromJson(needs.file-changes.outputs.subprojects)}}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: write
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: echo
+        run: echo ${{ matrix.subproject }}
 
-      - name: Update Version in Cargo.toml
+      - name: Set subproject as environment variable
+        run: echo "SUBPROJECT=${{ matrix.subproject }}" >> $GITHUB_ENV
+
+      - name: Check Label
+        id: check-labels
+        uses: mheap/github-action-required-labels@v5
+        with:
+          mode: exactly
+          count: 1
+          labels: "semver:patch, semver:minor, semver:major"
+          exit_type: success
+
+      - name: Get PR labels
+        id: pr-labels
+        uses: joerick/pr-labels-action@v1.0.8
+
+      - name: Find new version
+        # working-directory: contracts
         run: |
-          subproject="$INPUT_SUBPROJECT"
-          echo $subproject
-        env:
-          INPUT_SUBPROJECT: ${{ needs.discover-subprojects.outputs.subprojects }}
+          if [ -n "$GITHUB_PR_LABEL_SEMVER_MAJOR" ]; then
+            echo "bump major"
+            bump_type=major
+          elif [ -n "$GITHUB_PR_LABEL_SEMVER_MINOR" ]; then
+            echo "bump minor"
+            bump_type=minor
+          elif [ -n "$GITHUB_PR_LABEL_SEMVER_PATCH" ]; then
+            echo "bump patch"
+            bump_type=patch
+          else
+            echo "no bump"
+          fi
+          project_dir=${SUBPROJECT//_/\/}
+          current_version=$(awk -F"'" '/^version/ {print $2}' contracts/${project_dir}/build.gradle)
+          new_version=$(bash ./calculate_next_semver.sh "$current_version" "$bump_type" )
+          echo $new_version
+          sed -i "s/0.1.1/0.1.2/g" contracts/${project_dir}/build.gradle
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -a -m "Bump Version v${current_version} -> v${incremented_version}"
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
