@@ -36,7 +36,7 @@ jobs:
 
   update:
     needs: file-changes
-    if: ${{ steps.extract-subprojects.outputs.subprojects != '' }}
+    if: ${{ needs.file-changes.outputs.subprojects != '[]' && needs.file-changes.outputs.subprojects != '' }}
     strategy:
       matrix:
         subproject: ${{fromJson(needs.file-changes.outputs.subprojects)}}
